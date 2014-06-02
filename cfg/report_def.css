@@ -1,0 +1,56 @@
+body {
+    font-family: Georgia, serif;	
+}
+
+h1 { 
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    font-size: 24px;
+    font-weight: bolder;
+}
+  
+h2 {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    font-size: 20px
+    font-weight: bold;
+}  
+  
+h3 {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+}  
+  
+article {
+    /* border-style:dotted;*/
+    border-width: 2px;
+    padding: 5px;
+    margin: 5px;    
+}
+  
+table, th, td {
+    border: 1px dotted black;
+    /*border-collapse: collapse;*/
+    padding: 1px;
+    font-size: 14px;
+}
+
+table {
+    width: 990px;    
+}
+
+
+th { 
+    background-color: black;
+    color: #ffffff;
+}  
+body.header.div.table {
+    font-size: 12px;
+}
+
+.status {
+    width: 90px;   
+}  
+
+.name {
+    width: 200px;
+}

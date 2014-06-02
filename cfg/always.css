@@ -1,0 +1,12 @@
+
+.passed {
+    background-color: lime;
+}
+
+.failed {
+    background-color: red;
+}
+
+.nottested {
+    background-color: yellow;
+}
