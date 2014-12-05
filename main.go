@@ -32,13 +32,15 @@ func parseArgs(r *Runner) {
  * main -
  */
 func main() {
+
+    var err error
+
 //	    atf.RunBats() // for testing purposes : test/bats.go
 	r := NewRunner()
 	// parse CLI arguments
 	parseArgs(r)
 	// initialize new Runner; if initializaton fails, exit gracefully 
-	err := r.initialize()
-	if err != nil {
+	if err = r.initialize(); err != nil {
 		fmt.Println(err)
 		fmt.Println("Please define the input configuration file")
 		fmt.Println("Use '-h' switch to display help")
@@ -46,10 +48,11 @@ func main() {
 		os.Exit(1)
 	}
 //	r.display(true) // DEBUG
+
 	// now, run the damn thing....
 	r.Run()
-	//
 	//r.display(true) // DEBUG
+
 	r.CreateReports()
 	// close the logger
 	r.logger.Close()
