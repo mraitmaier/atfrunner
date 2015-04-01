@@ -1,7 +1,8 @@
+package main
+
 /*
  * main.go - the file to rule them all
  */
-package main
 
 import (
 	"flag"
@@ -33,13 +34,13 @@ func parseArgs(r *Runner) {
  */
 func main() {
 
-    var err error
+	var err error
 
-//	    atf.RunBats() // for testing purposes : test/bats.go
+	//	    atf.RunBats() // for testing purposes : test/bats.go
 	r := NewRunner()
 	// parse CLI arguments
 	parseArgs(r)
-	// initialize new Runner; if initializaton fails, exit gracefully 
+	// initialize new Runner; if initializaton fails, exit gracefully
 	if err = r.initialize(); err != nil {
 		fmt.Println(err)
 		fmt.Println("Please define the input configuration file")
@@ -47,7 +48,7 @@ func main() {
 		fmt.Println("Exiting...")
 		os.Exit(1)
 	}
-//	r.display(true) // DEBUG
+	//	r.display(true) // DEBUG
 
 	// now, run the damn thing....
 	r.Run()

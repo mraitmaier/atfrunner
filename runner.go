@@ -1,23 +1,21 @@
+package main
+
 /*
  * runner.go - the definition of the Runner struct & type, the main GoATF
  * CLI application data structure
  */
-package main
-
 import (
+	"bitbucket.org/miranr/atf"
+	"bitbucket.org/miranr/atf/utils"
 	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
-	"bitbucket.org/miranr/atf"
-	"bitbucket.org/miranr/atf/utils"
 )
 
-/*
- * Runner
- */
+// Runner is structure that holds all data needed for running the application.
 type Runner struct {
 	tr      *atf.TestReport // TestSet that's be run
 	input   string          // input configuration file (currently only JSON)
@@ -28,28 +26,24 @@ type Runner struct {
 	cssfile string
 	xml     bool       // create XML report (beside HTML report)
 	json    bool       // create JSON report (beside HTML report)
-    par     bool       // run tests in parallel? (default: false) TODO
+	par     bool       // run tests in parallel? (default: false) TODO
 	debug   bool       // enable debug mode (for testing purposes only)
-	logger  *utils.Log // a logger instance (
+	logger  *utils.Log // a logger instance
 }
 
-/*
- * NewRunner - Create new Runner instance and return its pointer;set the max 
- * number of loggers along the way...
- */
+// NewRunner creates new Runner instance and return its pointer.
 func NewRunner() *Runner {
+
 	var r = new(Runner)
 	r.logger = utils.NewLog()
-    r.par = false // run sequentially by default
+	r.par = false // run sequentially by default
 	return r
 }
 
-/*
- * Runner.display - displays the contents of the Runner type
- * If complete flag is 'true', method will display the complete TestSet;
- * otherwise only name will be printed
- */
+// Displays the contents of the Runner type. If complete flag is 'true', method will display the complete TestSet;
+// otherwise only name will be printed
 func (r *Runner) display(complete bool) {
+
 	fmt.Printf("Input config file: %q\n", r.input)
 	fmt.Printf("Working dir: %q\n", r.workdir)
 	fmt.Printf("Log filename: %q\n", r.logfile)
@@ -77,14 +71,9 @@ func (r *Runner) display(complete bool) {
 	}
 }
 
-/*
- * Runner.setWorkDir - set the working directory
- * Join both of the input parameters into proper system PATH.
- * If both input parameters are empty strings, create the default value; this
- * is OS dependant: on WinXY the default is bound to USERPROFILE environment
- * variable, while on POSIX systems, the default is bound to HOME envronment
- * variable.
- */
+// setWorkDir - set the working directory Join both of the input parameters into proper system PATH.
+// If both input parameters are empty strings, create the default value; this is OS dependant: on WinXY the default is bound
+// to USERPROFILE environment variable, while on POSIX systems, the default is bound to HOME envronment variable.
 func (r *Runner) setWorkDir(basedir string, tsName string) {
 	if basedir == "" {
 		if runtime.GOOS == "windows" {
@@ -98,15 +87,12 @@ func (r *Runner) setWorkDir(basedir string, tsName string) {
 	r.workdir = filepath.ToSlash(basedir)
 }
 
-/*
- * Runner.collect - collect the configuration that'll be executed
- * Parse the configuration file and create/update the appropriate data 
- * structures - first of all the TestSet.
- */
+// Runner.collect - collect the configuration that'll be executed Parse the configuration file and create/update the appropriate
+// data structures - first of all the TestSet.
 func (r *Runner) collect() (err error) {
 
-	var ts *atf.TestSet = new(atf.TestSet)
-    //ts.Sut = new(atf.SysUnderTest)
+	ts := new(atf.TestSet)
+	//ts.Sut = new(atf.SysUnderTest)
 
 	if r.input != "" {
 		ts = atf.Collect(r.input)
@@ -121,10 +107,8 @@ func (r *Runner) collect() (err error) {
 	return
 }
 
-// Let's define the default levels for different log handlers:
-// all text goes only to file logger, console should take only the most
-// important printous, while syslog handler should omit sending the execution
-// outputs. 
+// Let's define the default levels for different log handlers: all text goes only to file logger, console should take only the most
+// important printous, while syslog handler should omit sending the execution outputs.
 const (
 	defSyslogLevel utils.Severity = utils.Notice
 	defFileLevel   utils.Severity = utils.Informational
@@ -134,10 +118,9 @@ const (
 // the max number of loggers used here (console, file & syslog)
 //const numOfLoggers int = 3
 
-/*
- * Runner.createLog -
- */
+// Creates all needed log handlers.
 func (r *Runner) createLog() error {
+
 	logfile := ""
 	// logfile input argument is NOT empty...
 	if r.logfile != "" {
@@ -158,20 +141,16 @@ func (r *Runner) createLog() error {
 	if err != nil {
 		return err
 	}
-    r.logger.Start()
+	r.logger.Start()
 
 	// if logger is created, this message should print...
 	r.logger.Warning("Log successfully created\n")
-	//    r.logger.Notice("Displaying Runner configuration:")
-	//    r.logger.Notice(r.display(false))
 	return nil
 }
 
-/*
- * Runner.createLoggers -
- */
+// this function actually creates all the log handlers.
 func (r *Runner) createLoggers(format string, debug bool) error {
-	// first, we define log levels (severity) 
+	// first, we define log levels (severity)
 	fLevel := defFileLevel   // this is level for file handler
 	sLevel := defSyslogLevel // this is level for syslog & console handlers
 	if debug {
@@ -202,9 +181,7 @@ func (r *Runner) createLoggers(format string, debug bool) error {
 	return err
 }
 
-/*
- * Runner.initalize - 
- */
+// Initializes the Runner instance.
 func (r *Runner) initialize() error {
 	// let's collect the configuration
 	err := r.collect()
@@ -223,18 +200,16 @@ func (r *Runner) initialize() error {
 	return err
 }
 
-/*
- * Runner.Run -
- */
+// Run starts the Runner instance; it executes the test sequence.
 func (r *Runner) Run() {
 	// define a logging closure to be passed around...
 	fn := atf.ExecDisplayFnCback(func(params ...string) {
-        // we check that at least two string args are present; if more, we
-        // ignore them
+		// we check that at least two string args are present; if more, we
+		// ignore them
 		if len(params) < 2 {
 			panic("Callback: Wrong number of parameters.")
 		}
-        // now log the message
+		// now log the message
 		lvl := params[0] // the first arg is logging level
 		msg := params[1] // the second arg is logging message
 		r.logger.LogS(lvl, msg)
@@ -247,7 +222,7 @@ func (r *Runner) Run() {
 	// run test set only if it's not empty...
 	if r.tr.TestSet != nil {
 		r.logger.Notice(fmt.Sprintf("# Starting Test set: %q\n",
-						r.tr.TestSet.Name))
+			r.tr.TestSet.Name))
 		r.tr.TestSet.Execute(&fn) // we pass a ptr to defined closure
 	}
 
@@ -258,19 +233,17 @@ func (r *Runner) Run() {
 
 }
 
-/*
- * Runner.createHtmlHeader -
- */
-const mandatory_css = "cfg/always.css"
+// The createHtmlHeader function creates the header of the execution HTML report.
+const mandatoryCSS = "cfg/always.css"
 
-func (r *Runner) createHtmlHeader(name string) string {
+func (r *Runner) createHTMLHeader(name string) string {
 	s := "<!DOCTYPE html>\n"
 	s += "<html>\n<head>\n"
 	s += fmt.Sprintf("<meta charset=%q>\n", "utf-8")
 	s += fmt.Sprintf("<title>Report: %s</title>\n", name)
 	// include CSS file; default CSS is "cfg/report_def.css"
 	s += "<link rel=\"stylesheet\" type=\"text/css\" "
-	_, f1 := path.Split(mandatory_css)
+	_, f1 := path.Split(mandatoryCSS)
 	s += fmt.Sprintf("href=%q>\n", f1)
 	s += "<link rel=\"stylesheet\" type=\"text/css\" "
 	_, f2 := path.Split(r.cssfile)
@@ -279,19 +252,17 @@ func (r *Runner) createHtmlHeader(name string) string {
 	return s
 }
 
-/*
- * Runner.createXmlReport - create a XML version of the  test report 
- */
-func (r *Runner) createXmlReport(filename string) error {
+// The createXMLHeader function creates the execution XML report.
+func (r *Runner) createXMLReport(filename string) error {
 	x := fmt.Sprintf("<?xml version=%q encoding=%q?>", "1.0", "UTF-8")
-    // create XML representation
-    trXml, err := r.tr.Xml()
-    if err != nil {
-        return err
-    }
-	x += trXml
+	// create XML representation
+	trXML, err := r.tr.XML()
+	if err != nil {
+		return err
+	}
+	x += trXML
 
-    // write XML file
+	// write XML file
 	fout, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		return err
@@ -301,32 +272,31 @@ func (r *Runner) createXmlReport(filename string) error {
 	return nil
 }
 
-func (r *Runner) createJsonReport(filename string) error {
+// The createJSONHeader function creates the execution JSON report.
+func (r *Runner) createJSONReport(filename string) error {
 
-    json, err := r.tr.Json()
-    if err != nil {
-        return err
-    }
+	json, err := r.tr.JSON()
+	if err != nil {
+		return err
+	}
 
-    //
-    f, err := os.Create(filename)
-    if  err != nil {
-        return err
-    }
-    defer f.Close()
+	//
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 
-    fmt.Fprint(f, json)
-    return nil
+	fmt.Fprint(f, json)
+	return nil
 }
 
-/*
- * Runner.createHtmlReport -
- */
-func (r *Runner) createHtmlReport(filename string) error {
+// The createHTMLReport function creates the execution HTML report.
+func (r *Runner) createHTMLReport(filename string) error {
 	// HTML report is always created
-	html := r.createHtmlHeader(r.tr.TestSet.Name)
+	html := r.createHTMLHeader(r.tr.TestSet.Name)
 	html += "<body>\n"
-	h, err := r.tr.Html()
+	h, err := r.tr.HTML()
 	if err != nil {
 		return err
 	}
@@ -340,9 +310,9 @@ func (r *Runner) createHtmlReport(filename string) error {
 	defer fout.Close()
 	fmt.Fprint(fout, html)
 	// copy the CSS files with HTML report
-	_, f1 := path.Split(mandatory_css)
+	_, f1 := path.Split(mandatoryCSS)
 	_, f2 := path.Split(r.cssfile)
-	_, err = utils.CopyFile(path.Join(r.workdir, f1), mandatory_css)
+	_, err = utils.CopyFile(path.Join(r.workdir, f1), mandatoryCSS)
 	_, err = utils.CopyFile(path.Join(r.workdir, f2), r.cssfile)
 	if err != nil {
 		return err
@@ -350,13 +320,11 @@ func (r *Runner) createHtmlReport(filename string) error {
 	return nil
 }
 
-/*
- * Runner.CreateReports
- */
+// CreateReports creates the configured reports after the execution is over.
 func (r *Runner) CreateReports() {
 	// always create HTML report
 	filename := filepath.ToSlash(path.Join(r.workdir, "report.html"))
-	err := r.createHtmlReport(filename)
+	err := r.createHTMLReport(filename)
 	if err != nil {
 		r.logger.Error("XML report could not be created.\n")
 		r.logger.Error(fmt.Sprintf("Reason: %s\n", err))
@@ -367,7 +335,7 @@ func (r *Runner) CreateReports() {
 	// create XML report, if needed
 	if r.xml {
 		filename = filepath.ToSlash(path.Join(r.workdir, "report.xml"))
-		err := r.createXmlReport(filename)
+		err := r.createXMLReport(filename)
 		if err != nil {
 			r.logger.Error("XML report could not be created.\n")
 			r.logger.Error(fmt.Sprintf("Reason: %s\n", err))
@@ -376,20 +344,18 @@ func (r *Runner) CreateReports() {
 		r.logger.Notice(fmt.Sprintf("XML report %q created.\n", filename))
 	}
 
-    // JSON report upon request
-    if r.json {
+	// JSON report upon request
+	if r.json {
 		filename = filepath.ToSlash(path.Join(r.workdir, "report.json"))
-		err := r.createJsonReport(filename)
+		err := r.createJSONReport(filename)
 		if err != nil {
 			r.logger.Error("JSON report could not be created.\n")
 			r.logger.Error(fmt.Sprintf("Reason: %s\n", err))
 			return
 		}
 		r.logger.Notice(fmt.Sprintf("JSON report %q created.\n", filename))
-    }
+	}
 }
 
-/*
- * Runner.SetParallel - set the flag to execute the test cases in parallel 
- */
+// SetParallel sets the flag to execute the test cases in parallel.
 func (r *Runner) SetParallel() { r.par = true }
