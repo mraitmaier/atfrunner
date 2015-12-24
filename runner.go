@@ -5,8 +5,8 @@ package main
  * CLI application data structure
  */
 import (
-	"bitbucket.org/miranr/atf"
-	"bitbucket.org/miranr/atf/utils"
+	"github.com/mraitmaier/atf"
+	"github.com/mraitmaier/atf/utils"
 	"errors"
 	"fmt"
 	"os"
